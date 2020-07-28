@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:workouts/pages/authorization.dart';
-import 'package:workouts/pages/home.dart';
+import 'package:workouts/pages/check.dart';
 
 void main() {
   runApp(WorkoutsApp());
@@ -14,7 +13,7 @@ class WorkoutsApp extends StatelessWidget {
       theme: ThemeData(
           primaryColor: Color.fromRGBO(73, 161, 212, 1),
           textTheme: TextTheme(title: TextStyle(color: Colors.white))),
-      home: AuthorizationPage(),
+      home: CheckPage(),
     );
   }
 }

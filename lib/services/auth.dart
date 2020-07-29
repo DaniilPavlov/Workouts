@@ -11,6 +11,7 @@ class AuthService {
       FirebaseUser user = authResult.user;
       return User.fromFirebase(user);
     } catch (e) {
+      print(e);
       return null;
     }
   }
@@ -22,11 +23,12 @@ class AuthService {
       FirebaseUser user = authResult.user;
       return User.fromFirebase(user);
     } catch (e) {
+      print(e);
       return null;
     }
   }
 
-  Future<User> emailAndPasswordLogOut() async {
+  Future<User> logOut() async {
     await _auth.signOut();
   }
 

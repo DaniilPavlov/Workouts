@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:workouts/models/user.dart';
+import 'package:workouts/services/auth.dart';
 
 class AuthorizationPage extends StatefulWidget {
   @override
@@ -12,6 +15,8 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
   String _email;
   String _password;
   bool showLogin = true;
+
+  AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -104,11 +109,50 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
       ));
     }
 
-    void _buttonLogin() {
+    void _buttonLogin() async {
       _email = _emailController.text;
       _password = _passwordController.text;
-      _emailController.clear();
-      _passwordController.clear();
+
+      if (_email.isEmpty || _password.isEmpty) return;
+
+      User user = await _authService.emailAndPasswordLogIn(
+          _email.trim(), _password.trim());
+      if (user == null) {
+        Fluttertoast.showToast(
+            msg: "Error. Please check your email and password",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.blueAccent,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      } else {
+        _emailController.clear();
+        _passwordController.clear();
+      }
+    }
+
+    void _buttonRegistration() async {
+      _email = _emailController.text;
+      _password = _passwordController.text;
+
+      if (_email.isEmpty || _password.isEmpty) return;
+
+      User user = await _authService.emailAndPasswordReg(
+          _email.trim(), _password.trim());
+      if (user == null) {
+        Fluttertoast.showToast(
+            msg: "Error. Please check your email and password",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.blueAccent,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      } else {
+        _emailController.clear();
+        _passwordController.clear();
+      }
     }
 
     return Scaffold(
@@ -139,7 +183,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                   )
                 : Column(
                     children: <Widget>[
-                      _form('Registration', _buttonLogin),
+                      _form('Registration', _buttonRegistration),
                       Padding(
                         padding: EdgeInsets.all(10),
                         child: GestureDetector(

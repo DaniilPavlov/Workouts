@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:workouts/models/workout.dart';
+import 'package:workouts/services/auth.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -10,6 +11,14 @@ class HomePage extends StatelessWidget {
         appBar: AppBar(
           title: Text("Workouts"),
           leading: Icon(Icons.fitness_center),
+          actions: <Widget>[
+            FlatButton.icon(
+                onPressed: () {
+                  AuthService().logOut();
+                },
+                icon: Icon(Icons.supervised_user_circle, color: Colors.white),
+                label: SizedBox.shrink())
+          ],
         ),
         body: WorkoutsList(),
       ),

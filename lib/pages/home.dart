@@ -1,15 +1,39 @@
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:workouts/components/my-workouts.dart';
+import 'package:workouts/components/workouts-list.dart';
 import 'package:workouts/models/workout.dart';
 import 'package:workouts/services/auth.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int bottomSection = 0;
+
   @override
   Widget build(BuildContext context) {
+    var navigationBar = CurvedNavigationBar(
+      items: const <Widget>[Icon(Icons.fitness_center), Icon(Icons.search)],
+      index: 0,
+      height: 50,
+      color: Colors.white54,
+      buttonBackgroundColor: Colors.white,
+      backgroundColor: Colors.white54,
+      animationCurve: Curves.fastOutSlowIn,
+      animationDuration: Duration(milliseconds: 500),
+      onTap: (int index) {
+        setState(() => bottomSection = index);
+      },
+    );
     return Container(
       child: Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
         appBar: AppBar(
-          title: Text("Workouts"),
+          title: Text(
+              "Workouts //" + (bottomSection == 0 ? " My Page" : " Search")),
           leading: Icon(Icons.fitness_center),
           actions: <Widget>[
             FlatButton.icon(
@@ -20,70 +44,9 @@ class HomePage extends StatelessWidget {
                 label: SizedBox.shrink())
           ],
         ),
-        body: WorkoutsList(),
+        body: bottomSection == 0 ? MyWorkouts() : WorkoutsList(),
+        bottomNavigationBar: navigationBar,
       ),
-    );
-  }
-}
-
-class WorkoutsList extends StatelessWidget {
-  final workouts = <Workout>[
-    Workout(
-        title: 'test1', author: 'kek1', description: 'smth', level: 'Beginner'),
-    Workout(
-        title: 'test2',
-        author: 'kek1',
-        description: 'smth',
-        level: 'Intermediate'),
-    Workout(
-        title: 'test3', author: 'kek2', description: 'smth', level: 'Beginner'),
-    Workout(
-        title: 'test4', author: 'kek1', description: 'smth', level: 'Advanced'),
-    Workout(
-        title: 'test5', author: 'kek3', description: 'smth', level: 'Beginner'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Container(
-          child: ListView.builder(
-              itemCount: workouts.length,
-              itemBuilder: (context, i) {
-                return Card(
-                  elevation: 2,
-                  margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Container(
-                      decoration: BoxDecoration(
-                        color: Color.fromRGBO(73, 161, 212, 0.7),
-                      ),
-                      child: ListTile(
-                        contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                        leading: Container(
-                          padding: EdgeInsets.only(right: 12),
-                          child: Icon(
-                            Icons.fitness_center,
-                            color: Theme.of(context).textTheme.title.color,
-                          ),
-                          decoration: BoxDecoration(
-                              border: Border(
-                                  right: BorderSide(
-                                      width: 1, color: Colors.white))),
-                        ),
-                        title: Text(
-                          workouts[i].title,
-                          style: TextStyle(
-                              color: Theme.of(context).textTheme.title.color,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        trailing: Icon(
-                          Icons.keyboard_arrow_right,
-                          color: Theme.of(context).textTheme.title.color,
-                        ),
-                        subtitle: subtitle(context, workouts[i]),
-                      )),
-                );
-              })),
     );
   }
 }

@@ -122,7 +122,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
             msg: "Error. Please check your email and password",
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 1,
+            timeInSecForIos: 1,
             backgroundColor: Colors.blueAccent,
             textColor: Colors.white,
             fontSize: 16.0);
@@ -145,7 +145,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
             msg: "Error. Please check your email and password",
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 1,
+            timeInSecForIos: 1,
             backgroundColor: Colors.blueAccent,
             textColor: Colors.white,
             fontSize: 16.0);

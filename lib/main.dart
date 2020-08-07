@@ -14,6 +14,7 @@ class WorkoutsApp extends StatelessWidget {
     return StreamProvider<User>.value(
         value: AuthService().currentUser,
         child: MaterialApp(
+          debugShowCheckedModeBanner: false,
           title: "Workouts",
           theme: ThemeData(
               primaryColor: Color.fromRGBO(73, 161, 212, 1),

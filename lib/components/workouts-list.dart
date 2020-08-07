@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:workouts/core/constants.dart';
 import 'package:workouts/models/workout.dart';
-import 'package:workouts/pages/home.dart';
 
 class WorkoutsList extends StatefulWidget {
   @override
@@ -16,191 +16,233 @@ class _WorkoutsListState extends State<WorkoutsList> {
 
   final workouts = <Workout>[
     Workout(
-        title: 'test1', author: 'kek1', description: 'smth', level: 'Beginner'),
+        title: 'Test1',
+        author: 'Max1',
+        description: 'Test Workout1',
+        level: 'Beginner'),
     Workout(
-        title: 'test2',
-        author: 'kek1',
-        description: 'smth',
+        title: 'Test2',
+        author: 'Max2',
+        description: 'Test Workout2',
         level: 'Intermediate'),
     Workout(
-        title: 'test3', author: 'kek2', description: 'smth', level: 'Beginner'),
+        title: 'Test3',
+        author: 'Max3',
+        description: 'Test Workout3',
+        level: 'Advanced'),
     Workout(
-        title: 'test4', author: 'kek1', description: 'smth', level: 'Advanced'),
+        title: 'Test4',
+        author: 'Max4',
+        description: 'Test Workout4',
+        level: 'Beginner'),
     Workout(
-        title: 'test5', author: 'kek3', description: 'smth', level: 'Beginner'),
+        title: 'Test5',
+        author: 'Max5',
+        description: 'Test Workout5',
+        level: 'Intermediate'),
   ];
 
-  var filterMy = false;
-  var filterTitle = "";
-  var filterTitleController = TextEditingController();
-  var filterLevel = "Any Level";
-  var filterContent = "";
   var filterHeight = 0.0;
+  var filterText = '';
+  var filterOnlyMyWorkouts = false;
+  var filterTitle = '';
+  var filterLevel = 'Any Level';
+  var filterTitleController = TextEditingController();
 
-  List<Workout> applyFilter() {
+  List<Workout> filter() {
     setState(() {
-      filterContent = filterMy ? "My Workouts" : "All Workouts";
-      filterContent += "/" + filterLevel;
-      if (filterTitle.isNotEmpty) filterContent += "/" + filterTitle;
+      filterText = filterOnlyMyWorkouts ? 'My Workouts' : 'All workouts';
+      filterText += '/' + filterLevel;
+      print(filterTitle);
+      if (filterTitle.isNotEmpty) filterText += '/' + filterTitle;
       filterHeight = 0;
     });
+
     var list = workouts;
     return list;
   }
 
   List<Workout> clearFilter() {
     setState(() {
-      filterContent = "All Workouts/Any Level";
-      filterMy = false;
-      filterTitle = "";
-      filterLevel = "Any Level";
+      filterText = 'All workouts/Any Level';
+      filterOnlyMyWorkouts = false;
+      filterTitle = '';
+      filterLevel = 'Any Level';
       filterTitleController.clear();
       filterHeight = 0;
     });
+
     var list = workouts;
     return list;
   }
 
   @override
   Widget build(BuildContext context) {
-    var workoutsList = Expanded(
-        child: ListView.builder(
-            itemCount: workouts.length,
-            itemBuilder: (context, i) {
-              return Card(
-                elevation: 2,
-                margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Container(
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(73, 161, 212, 0.7),
-                    ),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                      leading: Container(
-                        padding: EdgeInsets.only(right: 12),
-                        child: Icon(
-                          Icons.fitness_center,
-                          color: Theme.of(context).textTheme.title.color,
-                        ),
-                        decoration: BoxDecoration(
-                            border: Border(
-                                right:
-                                    BorderSide(width: 1, color: Colors.white))),
-                      ),
-                      title: Text(
-                        workouts[i].title,
-                        style: TextStyle(
-                            color: Theme.of(context).textTheme.title.color,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      trailing: Icon(
-                        Icons.keyboard_arrow_right,
-                        color: Theme.of(context).textTheme.title.color,
-                      ),
-                      subtitle: subtitle(context, workouts[i]),
-                    )),
-              );
-            }));
-
-    var filterSection = Container(
+    var filterInfo = Container(
       margin: EdgeInsets.only(top: 3, left: 7, right: 7, bottom: 5),
-      decoration: BoxDecoration(color: Colors.white54),
+      decoration: BoxDecoration(color: bgColorWhite),
       height: 40,
       child: RaisedButton(
         child: Row(
           children: <Widget>[
             Icon(Icons.filter_list),
             Text(
-              filterContent,
+              filterText,
               style: TextStyle(),
               overflow: TextOverflow.ellipsis,
-            )
+            ),
           ],
         ),
         onPressed: () {
           setState(() {
-            filterHeight = (filterHeight == 0 ? 280 : 0);
+            filterHeight = (filterHeight == 0.0 ? 280.0 : 0.0);
           });
         },
       ),
     );
-
-    var levelMenu = <String>[
-      "Any Level",
-      "Beginner",
-      "Intermediate",
-      "Advanced"
+    var levelMenuItems = <String>[
+      'Any Level',
+      'Beginner',
+      'Intermediate',
+      'Advanced'
     ].map((String value) {
-      return DropdownMenuItem<String>(
+      return new DropdownMenuItem<String>(
         value: value,
-        child: Text(value),
+        child: new Text(value),
       );
     }).toList();
-
     var filterForm = AnimatedContainer(
-        margin: EdgeInsets.symmetric(vertical: 0.0, horizontal: 7),
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              children: [
-                SwitchListTile(
-                  title: const Text("Only my workouts"),
-                  value: filterMy,
-                  onChanged: (bool val) => setState(() => filterMy = val),
-                ),
-                DropdownButtonFormField<String>(
-                  decoration: InputDecoration(labelText: "Level"),
-                  items: levelMenu,
-                  value: filterLevel,
-                  onChanged: (String val) => setState(() => filterLevel = val),
-                ),
-                TextFormField(
-                  controller: filterTitleController,
-                  decoration: InputDecoration(labelText: "Title"),
-                  onChanged: (String val) => setState(() => filterTitle = val),
-                ),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      flex: 1,
-                      child: RaisedButton(
-                        onPressed: () {
-                          applyFilter();
-                        },
-                        child: Text("Apply",
-                            style: TextStyle(color: Colors.white)),
-                        color: Theme.of(context).primaryColor,
-                      ),
+      margin: EdgeInsets.symmetric(vertical: 0.0, horizontal: 7),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              SwitchListTile(
+                  title: const Text('Only My Workouts'),
+                  value: filterOnlyMyWorkouts,
+                  onChanged: (bool val) =>
+                      setState(() => filterOnlyMyWorkouts = val)),
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(labelText: 'Level'),
+                items: levelMenuItems,
+                value: filterLevel,
+                onChanged: (String val) => setState(() => filterLevel = val),
+              ),
+              TextFormField(
+                controller: filterTitleController,
+                decoration: const InputDecoration(labelText: 'Title'),
+                onChanged: (String val) => setState(() => filterTitle = val),
+              ),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    flex: 1,
+                    child: RaisedButton(
+                      onPressed: () {
+                        filter();
+                      },
+                      child:
+                          Text("Apply", style: TextStyle(color: Colors.white)),
+                      color: Theme.of(context).primaryColor,
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      flex: 1,
-                      child: RaisedButton(
-                        onPressed: () {
-                          clearFilter();
-                        },
-                        child: Text("Clear",
-                            style: TextStyle(color: Colors.white)),
-                        color: Colors.red,
-                      ),
-                    )
-                  ],
-                )
-              ],
-            ),
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    flex: 1,
+                    child: RaisedButton(
+                      onPressed: () {
+                        clearFilter();
+                      },
+                      child:
+                          Text("Clear", style: TextStyle(color: Colors.white)),
+                      color: Colors.red,
+                    ),
+                  )
+                ],
+              ),
+            ],
           ),
         ),
-        duration: Duration(milliseconds: 500),
-        curve: Curves.fastOutSlowIn,
-        height: filterHeight);
-
-    return Column(
-      children: <Widget>[
-        filterSection,
-        filterForm,
-        workoutsList,
-      ],
+      ),
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.fastOutSlowIn,
+      height: filterHeight,
     );
+    var widgetsList = Expanded(
+      child: ListView.builder(
+          itemCount: workouts.length,
+          itemBuilder: (context, i) {
+            return Card(
+              elevation: 2.0,
+              margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Container(
+                decoration:
+                    BoxDecoration(color: Color.fromRGBO(83, 181, 222, 1)),
+                child: ListTile(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                  leading: Container(
+                    padding: EdgeInsets.only(right: 12),
+                    child: Icon(Icons.fitness_center,
+                        color: Theme.of(context).textTheme.title.color),
+                    decoration: BoxDecoration(
+                        border: Border(
+                            right:
+                                BorderSide(width: 1, color: Colors.white24))),
+                  ),
+                  title: Text(workouts[i].title,
+                      style: TextStyle(
+                          color: Theme.of(context).textTheme.title.color,
+                          fontWeight: FontWeight.bold)),
+                  trailing: Icon(Icons.keyboard_arrow_right,
+                      color: Theme.of(context).textTheme.title.color),
+                  subtitle: subtitle(context, workouts[i]),
+                ),
+              ),
+            );
+          }),
+    );
+
+    return Column(children: [
+      filterInfo,
+      filterForm,
+      widgetsList,
+    ]);
   }
+}
+
+Widget subtitle(BuildContext context, Workout workout) {
+  var color = Colors.grey;
+  double indicatorLevel = 0;
+
+  switch (workout.level) {
+    case 'Beginner':
+      color = Colors.green;
+      indicatorLevel = 0.33;
+      break;
+    case 'Intermediate':
+      color = Colors.yellow;
+      indicatorLevel = 0.66;
+      break;
+    case 'Advanced':
+      color = Colors.red;
+      indicatorLevel = 1;
+      break;
+  }
+
+  return Row(
+    children: <Widget>[
+      Expanded(
+          flex: 1,
+          child: LinearProgressIndicator(
+              backgroundColor: Theme.of(context).textTheme.title.color,
+              value: indicatorLevel,
+              valueColor: AlwaysStoppedAnimation(color))),
+      SizedBox(width: 10),
+      Expanded(
+          flex: 3,
+          child: Text(workout.level,
+              style: TextStyle(color: Theme.of(context).textTheme.title.color)))
+    ],
+  );
 }

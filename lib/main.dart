@@ -11,6 +11,7 @@ void main() {
 class WorkoutsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // С помощью StreamProvider<User> мы всегда знаем текущего нашего пользователя
     return StreamProvider<User>.value(
         value: AuthService().currentUser,
         child: MaterialApp(

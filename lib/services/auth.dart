@@ -2,13 +2,25 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:workouts/models/user.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _fAuth = FirebaseAuth.instance;
 
-  Future<User> emailAndPasswordLogIn(String email, String password) async {
+  Future<User> signInWithEmailAndPassword(String email, String password) async {
     try {
-      AuthResult authResult = await _auth.signInWithEmailAndPassword(
+      AuthResult result = await _fAuth.signInWithEmailAndPassword(
           email: email, password: password);
-      FirebaseUser user = authResult.user;
+      FirebaseUser user = result.user;
+      return User.fromFirebase(user);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<User> registerWithEmailAndPassword(
+      String email, String password) async {
+    try {
+      AuthResult result = await _fAuth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      FirebaseUser user = result.user;
       return User.fromFirebase(user);
     } catch (e) {
       print(e);
@@ -16,24 +28,12 @@ class AuthService {
     }
   }
 
-  Future<User> emailAndPasswordReg(String email, String password) async {
-    try {
-      AuthResult authResult = await _auth.createUserWithEmailAndPassword(
-          email: email, password: password);
-      FirebaseUser user = authResult.user;
-      return User.fromFirebase(user);
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
-
-  Future<User> logOut() async {
-    await _auth.signOut();
+  Future logOut() async {
+    await _fAuth.signOut();
   }
 
   Stream<User> get currentUser {
-    return _auth.onAuthStateChanged.map(
+    return _fAuth.onAuthStateChanged.map(
         (FirebaseUser user) => user != null ? User.fromFirebase(user) : null);
   }
 }

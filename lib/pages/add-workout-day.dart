@@ -10,6 +10,7 @@ import 'package:workouts/models/workout.dart';
 
 class AddWorkoutDay extends StatefulWidget {
   final WorkoutWeekDay day;
+
   AddWorkoutDay({Key key, this.day}) : super(key: key);
 
   @override
@@ -43,9 +44,9 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
     'EMOM',
   ]
       .map((String value) => DropdownMenuItem<String>(
-    value: value,
-    child: Text(value),
-  ))
+            value: value,
+            child: Text(value),
+          ))
       .toList();
 
   void _addDrillsBlock() {
@@ -84,19 +85,19 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
       title: Text("Select Drill Type"),
       content: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'Drill Type'),
-                  items: _drillTypeMenuItems,
-                  value: _defaultNewDrillType,
-                  onChanged: (String val) =>
-                      setState(() => _defaultNewDrillType = val),
-                ),
-              ],
-            );
-          }),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: 'Drill Type'),
+              items: _drillTypeMenuItems,
+              value: _defaultNewDrillType,
+              onChanged: (String val) =>
+                  setState(() => _defaultNewDrillType = val),
+            ),
+          ],
+        );
+      }),
       actions: <Widget>[
         new FlatButton(
             onPressed: () {
@@ -159,10 +160,32 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
             initialValue: {},
             readOnly: false,
             child: Column(
-                children: day.drillBlocks.map((block) {
+              children: <Widget>[
+                Column(
+                    children: day.drillBlocks.map((block) {
                   var index = day.drillBlocks.indexOf(block);
                   return _buildDrillsBlock(index, block);
                 }).toList()),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: FormBuilderTextField(
+                    attribute: "notes",
+                    decoration: InputDecoration(
+                      labelText: "Notes",
+                    ),
+                    initialValue: day.notes,
+                    onChanged: (dynamic val) {
+                      setState(() {
+                        day.notes = val;
+                      });
+                    },
+                    validators: [
+                      FormBuilderValidators.maxLength(500),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -176,7 +199,7 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
         margin: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         child: Container(
           decoration:
-          BoxDecoration(color: _getDrillBlockHeaderColor(context, block)),
+              BoxDecoration(color: _getDrillBlockHeaderColor(context, block)),
           child: Column(
             children: <Widget>[
               ListTile(
@@ -189,24 +212,24 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
                   SizedBox(width: 20),
                   _canSelectDrillsCount(block)
                       ? DropdownButton(
-                    items: Iterable<int>.generate(5)
-                        .map((val) => DropdownMenuItem(
-                      value: _isMultisetWorkout(block)
-                          ? val + 2
-                          : val + 1,
-                      child: Text(
-                          '${_isMultisetWorkout(block) ? (val + 2) : (val + 1)} Drills'),
-                    ))
-                        .toList(),
-                    onChanged: (val) {
-                      setState(() {
-                        block.changeDrillsCount(val);
-                      });
-                    },
-                    value: block.drills.length,
-                    style: TextStyle(
-                        color: Colors.blue, fontWeight: FontWeight.bold),
-                  )
+                          items: Iterable<int>.generate(5)
+                              .map((val) => DropdownMenuItem(
+                                    value: _isMultisetWorkout(block)
+                                        ? val + 2
+                                        : val + 1,
+                                    child: Text(
+                                        '${_isMultisetWorkout(block) ? (val + 2) : (val + 1)} Drills'),
+                                  ))
+                              .toList(),
+                          onChanged: (val) {
+                            setState(() {
+                              block.changeDrillsCount(val);
+                            });
+                          },
+                          value: block.drills.length,
+                          style: TextStyle(
+                              color: Colors.blue, fontWeight: FontWeight.bold),
+                        )
                       : SizedBox.shrink()
                 ]),
                 trailing: IconButton(
@@ -235,23 +258,21 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
 
   isNumeric(string) =>
       string != null && int.tryParse(string.toString().trim()) != null;
+
   cleanInt(string) => int.parse(string.toString().trim());
 
   Widget _buildDrills(int blockIndex, WorkoutDrillsBlock block) {
     return Column(
-        children:
-        Iterable<int>.generate(block.drills.length)
+        children: Iterable<int>.generate(block.drills.length)
             .map(
               (ind) => Drill(
-            isSingleDrill: block.drills.length <= 1,
-            drillBlockIndex: blockIndex,
-            index: ind,
-            drill: block.drills[ind],
-          ),
-        )
-            .toList()
-
-    );
+                isSingleDrill: block.drills.length <= 1,
+                drillBlockIndex: blockIndex,
+                index: ind,
+                drill: block.drills[ind],
+              ),
+            )
+            .toList());
   }
 
   Widget _buildDrillBlockParams(int index, WorkoutDrillsBlock block) {
@@ -263,7 +284,7 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
               padding: EdgeInsets.only(left: 4, right: 4),
               child: FormBuilderTextField(
                 initialValue:
-                block.minutes == null ? '' : block.minutes.toString(),
+                    block.minutes == null ? '' : block.minutes.toString(),
                 attribute: "minutes_$index",
                 decoration: InputDecoration(
                   labelText: "Minutes *",
@@ -290,7 +311,7 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
               padding: EdgeInsets.only(left: 4, right: 4),
               child: FormBuilderTextField(
                 initialValue:
-                block.timeCapMin == null ? '' : block.timeCapMin.toString(),
+                    block.timeCapMin == null ? '' : block.timeCapMin.toString(),
                 attribute: "timeCapMin_$index",
                 decoration: InputDecoration(
                   labelText: "Time Cap in minutes *",
@@ -310,7 +331,7 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
               padding: EdgeInsets.only(left: 4, right: 4),
               child: FormBuilderTextField(
                 initialValue:
-                block.rounds == null ? '' : block.rounds.toString(),
+                    block.rounds == null ? '' : block.rounds.toString(),
                 attribute: "rounds_$index",
                 decoration: InputDecoration(
                   labelText: "Rounds *",
@@ -359,7 +380,7 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
               padding: EdgeInsets.only(left: 4, right: 4),
               child: FormBuilderTextField(
                 initialValue:
-                block.timeCapMin == null ? '' : block.timeCapMin.toString(),
+                    block.timeCapMin == null ? '' : block.timeCapMin.toString(),
                 attribute: "timeCapMin_$index",
                 decoration: InputDecoration(
                   labelText: "Time Cap in minutes *",
@@ -407,7 +428,7 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
               padding: EdgeInsets.only(left: 4, right: 4),
               child: FormBuilderTextField(
                 initialValue:
-                block.timeMin == null ? '' : block.timeMin.toString(),
+                    block.timeMin == null ? '' : block.timeMin.toString(),
                 attribute: "timeMin_$index",
                 decoration: InputDecoration(
                   labelText: "Minutes *",
@@ -435,7 +456,7 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
       BuildContext context, WorkoutDrillsBlock block) {
     if (block is WorkoutRestDrillBlock) return Color.fromRGBO(80, 150, 70, 0.9);
 
-    return Color.fromRGBO(83, 181, 222, 1);
+    return Color.fromRGBO(50, 65, 85, 0.9);
   }
 
   String _getDrillBlockHeader(WorkoutDrillsBlock block) {

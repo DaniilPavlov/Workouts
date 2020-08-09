@@ -6,33 +6,41 @@ import 'package:workouts/pages/add-workout.dart';
 import 'package:workouts/services/auth.dart';
 
 class HomePage extends StatefulWidget {
+  HomePage({Key key}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int bottomSection = 0;
+  int sectionIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     var navigationBar = CurvedNavigationBar(
-      items: const <Widget>[Icon(Icons.fitness_center), Icon(Icons.search)],
+      items: const <Widget>[
+        Icon(Icons.fitness_center),
+        Icon(Icons.search),
+      ],
       index: 0,
-      height: 50,
-      color: Colors.white54,
+      height: 47,
+      color: Colors.white.withOpacity(0.5),
       buttonBackgroundColor: Colors.white,
-      backgroundColor: Colors.white54,
-      animationCurve: Curves.fastOutSlowIn,
+      backgroundColor: Colors.white.withOpacity(0.35),
+      animationCurve: Curves.easeInOut,
       animationDuration: Duration(milliseconds: 500),
       onTap: (int index) {
-        setState(() => bottomSection = index);
+        setState(() {
+          sectionIndex = index;
+        });
       },
     );
+
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        title:
-            Text("Workouts //" + (bottomSection == 0 ? " My Page" : " Search")),
+        title: Text(
+            'Workouts // ${sectionIndex == 0 ? 'My Workouts' : 'Search'}'),
         leading: Icon(Icons.fitness_center),
         actions: <Widget>[
           FlatButton.icon(
@@ -46,7 +54,7 @@ class _HomePageState extends State<HomePage> {
               label: SizedBox.shrink())
         ],
       ),
-      body: bottomSection == 0 ? MyWorkouts() : WorkoutsList(),
+      body: sectionIndex == 0 ? MyWorkouts() : WorkoutsList(),
       bottomNavigationBar: navigationBar,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:workouts/models/user.dart';
 import 'package:workouts/services/auth.dart';
 
 class AuthorizationPage extends StatefulWidget {
+  AuthorizationPage({Key key}) : super(key: key);
+
   @override
   _AuthorizationPageState createState() => _AuthorizationPageState();
 }
@@ -16,25 +17,21 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
   String _password;
   bool showLogin = true;
 
-  AuthService _authService = AuthService();
+  final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
-    Widget _logotype() {
+    Widget _logo() {
       return Padding(
-        padding: EdgeInsets.only(top: 100),
-        child: Container(
-          child: Align(
-            child: Text(
-              'WORKOUTS',
-              style: TextStyle(
-                  fontSize: 50,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
-          ),
-        ),
-      );
+          padding: EdgeInsets.only(top: 100),
+          child: Container(
+              child: Align(
+                  child: Text('WORKOUTS',
+                      style: TextStyle(
+                        fontSize: 45,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      )))));
     }
 
     Widget _input(Icon icon, String hint, TextEditingController controller,
@@ -42,26 +39,24 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
       return Container(
         padding: EdgeInsets.only(left: 20, right: 20),
         child: TextField(
-            controller: controller,
-            obscureText: obscure,
-            style: TextStyle(fontSize: 20, color: Colors.white),
-            decoration: InputDecoration(
-                hintStyle: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.white38),
-                hintText: hint,
-                focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white, width: 3)),
-                enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white60, width: 1)),
-                prefixIcon: Padding(
+          controller: controller,
+          obscureText: obscure,
+          style: TextStyle(fontSize: 20, color: Colors.white),
+          decoration: InputDecoration(
+              hintStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Colors.white30),
+              hintText: hint,
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white, width: 3)),
+              enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white54, width: 1)),
+              prefixIcon: Padding(
                   padding: EdgeInsets.only(left: 10, right: 10),
                   child: IconTheme(
-                    data: IconThemeData(color: Colors.white),
-                    child: icon,
-                  ),
-                ))),
+                      data: IconThemeData(color: Colors.white), child: icon))),
+        ),
       );
     }
 
@@ -83,96 +78,107 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
 
     Widget _form(String label, void func()) {
       return Container(
-          child: Column(
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(bottom: 20, top: 10),
-            child: _input(Icon(Icons.email), "EMAIL", _emailController, false),
-          ),
-          Padding(
-            padding: EdgeInsets.only(bottom: 20),
-            child:
-                _input(Icon(Icons.lock), "PASSWORD", _passwordController, true),
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: 20, right: 20),
-            child: Container(
-              height: 50,
-              width: MediaQuery.of(context).size.width,
-              child: _button(label, func),
+        child: Column(
+          children: <Widget>[
+            Padding(
+                padding: EdgeInsets.only(bottom: 20, top: 10),
+                child: _input(
+                    Icon(Icons.email), "EMAIL", _emailController, false)),
+            Padding(
+                padding: EdgeInsets.only(bottom: 20),
+                child: _input(
+                    Icon(Icons.lock), "PASSWORD", _passwordController, true)),
+            SizedBox(
+              height: 20,
             ),
-          )
-        ],
-      ));
+            Padding(
+                padding: EdgeInsets.only(left: 20, right: 20),
+                child: Container(
+                    height: 50,
+                    width: MediaQuery.of(context).size.width,
+                    child: _button(label, func)))
+          ],
+        ),
+      );
     }
 
-    void _buttonLogin() async {
+    void _signInButtonAction() async {
       _email = _emailController.text;
       _password = _passwordController.text;
 
       if (_email.isEmpty || _password.isEmpty) return;
-
-      User user = await _authService.emailAndPasswordLogIn(
+      dynamic user = await _authService.signInWithEmailAndPassword(
           _email.trim(), _password.trim());
-      if (user == null) {
+      if (user == null)
         Fluttertoast.showToast(
-            msg: "Error. Please check your email and password",
+            msg: "Error! Please check your email/password",
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.CENTER,
             timeInSecForIos: 1,
-            backgroundColor: Colors.blueAccent,
+            backgroundColor: Colors.red,
             textColor: Colors.white,
             fontSize: 16.0);
-      } else {
+      else {
         _emailController.clear();
         _passwordController.clear();
       }
     }
 
-    void _buttonRegistration() async {
+    void _registerButtonAction() async {
       _email = _emailController.text;
       _password = _passwordController.text;
 
       if (_email.isEmpty || _password.isEmpty) return;
 
-      User user = await _authService.emailAndPasswordReg(
+      dynamic user = await _authService.registerWithEmailAndPassword(
           _email.trim(), _password.trim());
-      if (user == null) {
+      if (user == null)
         Fluttertoast.showToast(
-            msg: "Error. Please check your email and password",
+            msg: "Error! Please check your email/password",
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.CENTER,
             timeInSecForIos: 1,
-            backgroundColor: Colors.blueAccent,
+            backgroundColor: Colors.red,
             textColor: Colors.white,
             fontSize: 16.0);
-      } else {
+      else {
         _emailController.clear();
         _passwordController.clear();
       }
+    }
+
+    Widget _bottomWave() {
+      return Expanded(
+        child: Align(
+          child: ClipPath(
+            child: Container(
+              color: Colors.white,
+              height: 300,
+            ),
+          ),
+          alignment: Alignment.bottomCenter,
+        ),
+      );
     }
 
     return Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
         body: Column(
           children: <Widget>[
-            _logotype(),
-            SizedBox(height: 50),
+            _logo(),
+            SizedBox(
+              height: 100,
+            ),
             (showLogin
                 ? Column(
                     children: <Widget>[
-                      _form('Log in', _buttonLogin),
+                      _form('LOGIN', _signInButtonAction),
                       Padding(
                         padding: EdgeInsets.all(10),
                         child: GestureDetector(
-                            child: Text(
-                              'Not registered yet?',
-                              style:
-                                  TextStyle(fontSize: 20, color: Colors.white),
-                            ),
+                            child: Text('Not registered yet? Register!',
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white)),
                             onTap: () {
                               setState(() {
                                 showLogin = false;
@@ -183,15 +189,13 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                   )
                 : Column(
                     children: <Widget>[
-                      _form('Registration', _buttonRegistration),
+                      _form('REGISTER', _registerButtonAction),
                       Padding(
                         padding: EdgeInsets.all(10),
                         child: GestureDetector(
-                            child: Text(
-                              'Already registered?',
-                              style:
-                                  TextStyle(fontSize: 20, color: Colors.white),
-                            ),
+                            child: Text('Already registered? Login!',
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white)),
                             onTap: () {
                               setState(() {
                                 showLogin = true;

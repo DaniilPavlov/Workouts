@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:workouts/core/constants.dart';
 import 'package:workouts/models/user.dart';
 import 'package:workouts/models/workout.dart';
 import 'package:workouts/services/database.dart';
+import 'dart:async';
+import 'package:workouts/components/common/workout-level.dart';
+import 'package:workouts/pages/workout-details.dart';
 
 class WorkoutsList extends StatefulWidget {
   @override
@@ -12,7 +14,6 @@ class WorkoutsList extends StatefulWidget {
 
 class _WorkoutsListState extends State<WorkoutsList> {
   User user;
-  DatabaseService db = DatabaseService();
 
   @override
   void initState() {
@@ -20,6 +21,17 @@ class _WorkoutsListState extends State<WorkoutsList> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    if (workoutsStreamSubscription != null) {
+      print('unsubscribing');
+      workoutsStreamSubscription.cancel();
+    }
+    super.dispose();
+  }
+
+  var db = DatabaseService();
+  StreamSubscription<List<Workout>> workoutsStreamSubscription;
   var workouts = List<Workout>();
 
   var filterHeight = 0.0;
@@ -29,19 +41,17 @@ class _WorkoutsListState extends State<WorkoutsList> {
   var filterLevel = 'Any Level';
   var filterTitleController = TextEditingController();
 
-  // Фильтр в меню
   void filter({bool clear = false}) {
     if (clear) {
       filterOnlyMyWorkouts = false;
-      filterTitle = "";
-      filterLevel = "Any Level";
+      filterTitle = '';
+      filterLevel = 'Any Level';
       filterTitleController.clear();
     }
 
     setState(() {
       filterText = filterOnlyMyWorkouts ? 'My Workouts' : 'All workouts';
       filterText += '/' + filterLevel;
-      print(filterTitle);
       if (filterTitle.isNotEmpty) filterText += '/' + filterTitle;
       filterHeight = 0;
     });
@@ -49,15 +59,12 @@ class _WorkoutsListState extends State<WorkoutsList> {
     loadData();
   }
 
-  // Достает данные из базы
-  loadData() async {
+  Future<void> loadData() async {
     var stream = db.getWorkouts(
         author: filterOnlyMyWorkouts ? user.id : null,
         level: filterLevel != 'Any Level' ? filterLevel : null);
 
-    // Постоянно слушаем наш стрим и ждем когда придет список воркаутов
-    stream.listen((List<Workout> data) {
-      // Передаем переменной workouts наши воркауты
+    workoutsStreamSubscription = stream.listen((List<Workout> data) {
       setState(() {
         workouts = data;
       });
@@ -67,9 +74,10 @@ class _WorkoutsListState extends State<WorkoutsList> {
   @override
   Widget build(BuildContext context) {
     user = Provider.of<User>(context);
+
     var filterInfo = Container(
       margin: EdgeInsets.only(top: 3, left: 7, right: 7, bottom: 5),
-      decoration: BoxDecoration(color: bgColorWhite),
+      decoration: BoxDecoration(color: Colors.white.withOpacity(0.5)),
       height: 40,
       child: RaisedButton(
         child: Row(
@@ -84,7 +92,7 @@ class _WorkoutsListState extends State<WorkoutsList> {
         ),
         onPressed: () {
           setState(() {
-            filterHeight = (filterHeight == 0.0 ? 280.0 : 0.0);
+            filterHeight = (filterHeight == 0.0 ? 220.0 : 0.0);
           });
         },
       ),
@@ -118,11 +126,11 @@ class _WorkoutsListState extends State<WorkoutsList> {
                 value: filterLevel,
                 onChanged: (String val) => setState(() => filterLevel = val),
               ),
-//              TextFormField(
-//                controller: filterTitleController,
-//                decoration: const InputDecoration(labelText: 'Title'),
-//                onChanged: (String val) => setState(() => filterTitle = val),
-//              ),
+              // TextFormField(
+              //   controller: filterTitleController,
+              //   decoration: const InputDecoration(labelText: 'Title'),
+              //   onChanged: (String val) => setState(() => filterTitle = val),
+              // ),
               Row(
                 children: <Widget>[
                   Expanded(
@@ -162,31 +170,37 @@ class _WorkoutsListState extends State<WorkoutsList> {
       child: ListView.builder(
           itemCount: workouts.length,
           itemBuilder: (context, i) {
-            return Card(
-              key: Key(workouts[i].uid),
-              elevation: 2.0,
-              margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Container(
-                decoration:
-                    BoxDecoration(color: Color.fromRGBO(83, 181, 222, 1)),
-                child: ListTile(
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                  leading: Container(
-                    padding: EdgeInsets.only(right: 12),
-                    child: Icon(Icons.fitness_center,
-                        color: Theme.of(context).textTheme.title.color),
-                    decoration: BoxDecoration(
-                        border: Border(
-                            right:
-                                BorderSide(width: 1, color: Colors.white24))),
+            return InkWell(
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (ctx) => WorkoutDetails(id: workouts[i].id)));
+              },
+              child: Card(
+                key: Key(workouts[i].id),
+                elevation: 2.0,
+                margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Container(
+                  decoration:
+                      BoxDecoration(color: Color.fromRGBO(50, 65, 85, 0.9)),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                    leading: Container(
+                      padding: EdgeInsets.only(right: 12),
+                      child: Icon(Icons.fitness_center,
+                          color: Theme.of(context).textTheme.headline6.color),
+                      decoration: BoxDecoration(
+                          border: Border(
+                              right:
+                                  BorderSide(width: 1, color: Colors.white24))),
+                    ),
+                    title: Text(workouts[i].title,
+                        style: TextStyle(
+                            color: Theme.of(context).textTheme.headline6.color,
+                            fontWeight: FontWeight.bold)),
+                    trailing: Icon(Icons.keyboard_arrow_right,
+                        color: Theme.of(context).textTheme.headline6.color),
+                    subtitle: WorkoutLevel(level: workouts[i].level),
                   ),
-                  title: Text(workouts[i].title,
-                      style: TextStyle(
-                          color: Theme.of(context).textTheme.title.color,
-                          fontWeight: FontWeight.bold)),
-                  trailing: Icon(Icons.keyboard_arrow_right,
-                      color: Theme.of(context).textTheme.title.color),
-                  subtitle: subtitle(context, workouts[i]),
                 ),
               ),
             );
@@ -199,40 +213,4 @@ class _WorkoutsListState extends State<WorkoutsList> {
       widgetsList,
     ]);
   }
-}
-
-Widget subtitle(BuildContext context, Workout workout) {
-  var color = Colors.grey;
-  double indicatorLevel = 0;
-
-  switch (workout.level) {
-    case 'Beginner':
-      color = Colors.green;
-      indicatorLevel = 0.33;
-      break;
-    case 'Intermediate':
-      color = Colors.yellow;
-      indicatorLevel = 0.66;
-      break;
-    case 'Advanced':
-      color = Colors.red;
-      indicatorLevel = 1;
-      break;
-  }
-
-  return Row(
-    children: <Widget>[
-      Expanded(
-          flex: 1,
-          child: LinearProgressIndicator(
-              backgroundColor: Theme.of(context).textTheme.title.color,
-              value: indicatorLevel,
-              valueColor: AlwaysStoppedAnimation(color))),
-      SizedBox(width: 10),
-      Expanded(
-          flex: 3,
-          child: Text(workout.level,
-              style: TextStyle(color: Theme.of(context).textTheme.title.color)))
-    ],
-  );
 }

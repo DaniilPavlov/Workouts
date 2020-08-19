@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:workouts/models/user.dart';
 import 'package:workouts/pages/authorization.dart';
-
 import 'home.dart';
 
 class CheckPage extends StatelessWidget {

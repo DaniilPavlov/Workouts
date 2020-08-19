@@ -1,17 +1,17 @@
+import 'package:flutter/material.dart';
+
 class Workout {
-  String uid;
+  final String id;
   String title;
   String author;
   String description;
   String level;
   bool isOnline;
 
-  Workout({this.uid, this.title, this.author, this.description, this.level});
+  Workout({this.id, this.title, this.author, this.description, this.level});
 
   // Эти значения забираются из базы и по ним мы заполняем поля в меню
-  // Лучше переименовать в fromJson (хотя map по сути это json)
-  Workout.fromJson(String uid, Map<String, dynamic> data) {
-    uid = uid;
+  Workout.fromJson(Map<String, dynamic> data, {@required this.id}) {
     title = data['title'];
     author = data['author'];
     description = data['description'];
@@ -30,15 +30,21 @@ class WorkoutSchedule {
 
   WorkoutSchedule(
       {this.uid,
-      this.author,
-      this.title,
-      this.level,
-      this.description,
-      this.weeks});
+        this.author,
+        this.title,
+        this.level,
+        this.description,
+        this.weeks});
 
   WorkoutSchedule copy() {
     var copiedWeeks = weeks.map((w) => w.copy()).toList();
-    return WorkoutSchedule(weeks: copiedWeeks);
+    return WorkoutSchedule(
+        uid: this.uid,
+        author: this.author,
+        title: this.title,
+        level: this.level,
+        description: this.description,
+        weeks: copiedWeeks);
   }
 
   Map<String, dynamic> toMap() {
@@ -62,6 +68,17 @@ class WorkoutSchedule {
       "createdOn": DateTime.now().millisecondsSinceEpoch
     };
   }
+
+  //метод fromJson забирает значения из базы
+  WorkoutSchedule.fromJson(String uid, Map<String, dynamic> data) {
+    this.uid = uid;
+    title = data['title'];
+    author = data['author'];
+    description = data['description'];
+    level = data['level'];
+
+    weeks = (data['weeks'] as List).map((w) => WorkoutWeek.fromJson(w)).toList();
+  }
 }
 
 class WorkoutWeek {
@@ -80,7 +97,16 @@ class WorkoutWeek {
   }
 
   Map<String, dynamic> toMap() {
-    return {"notes": notes, "days": days.map((w) => w.toMap()).toList()};
+    return {
+      "notes": notes,
+      "days": days.map((w) => w.toMap()).toList(),
+    };
+  }
+
+  WorkoutWeek.fromJson(Map<String, dynamic> value) {
+    notes = value['notes'];
+    days =
+        (value['days'] as List).map((w) => WorkoutWeekDay.fromJson(w)).toList();
   }
 }
 
@@ -89,10 +115,12 @@ class WorkoutWeekDay {
   List<WorkoutDrillsBlock> drillBlocks;
 
   bool get isSet => drillBlocks != null && drillBlocks.length > 0;
-
   int get notRestDrillBlocksCount => isSet
       ? drillBlocks.where((b) => !(b is WorkoutRestDrillBlock)).length
       : 0;
+  int getNotRestDrillBlockIndex(WorkoutDrillsBlock block) => isSet
+      ?  (drillBlocks.where((b) => !(b is WorkoutRestDrillBlock)).toList().indexOf(block))
+      : -1;
 
   WorkoutWeekDay({this.drillBlocks, this.notes});
 
@@ -106,6 +134,13 @@ class WorkoutWeekDay {
       "notes": notes,
       "drillBlocks": drillBlocks.map((w) => w.toMap()).toList()
     };
+  }
+
+  WorkoutWeekDay.fromJson(Map<String, dynamic> value) {
+    notes = value['notes'];
+    drillBlocks = (value['drillBlocks'] as List)
+        .map((w) => WorkoutDrillsBlock.fromJson(w))
+        .toList();
   }
 }
 
@@ -123,6 +158,13 @@ class WorkoutDrill {
 
   Map<String, dynamic> toMap() {
     return {"title": title, "weight": weight, "sets": sets, "reps": reps};
+  }
+
+  WorkoutDrill.fromJson(Map<String, dynamic> value) {
+    title = value['title'];
+    weight = value['weight'];
+    sets = value['sets'];
+    reps = value['reps'];
   }
 }
 
@@ -157,7 +199,6 @@ abstract class WorkoutDrillsBlock {
   }
 
   WorkoutDrillsBlock copy();
-
   Map<String, dynamic> toMapParams();
 
   Map<String, dynamic> toMap() {
@@ -169,17 +210,59 @@ abstract class WorkoutDrillsBlock {
     return {}..addAll(mainMap)..addAll(toMapParams());
   }
 
+  factory WorkoutDrillsBlock.fromJson(Map<String, dynamic> value) {
+    var type = value['type'];
+    var drills = ((value['drills'] ?? List) as List)
+        .map((d) => WorkoutDrill.fromJson(d))
+        .toList();
+
+    WorkoutDrillsBlock block;
+    WorkoutDrillType drillType =
+    WorkoutDrillType.values.firstWhere((e) => e.toString() == type);
+    switch (drillType) {
+      case WorkoutDrillType.AMRAP:
+        block =
+            WorkoutAmrapDrillBlock(drills: drills, minutes: value['minutes']);
+        break;
+      case WorkoutDrillType.SINGLE:
+        block = WorkoutSingleDrillBlock(drill: drills[0]);
+        break;
+      case WorkoutDrillType.MULTISET:
+        block = WorkoutMultisetDrillBlock(drills: drills);
+        break;
+      case WorkoutDrillType.ForTime:
+        block = WorkoutForTimeDrillBlock(
+            drills: drills,
+            timeCapMin: value['timeCapMin'],
+            rounds: value['rounds'],
+            restBetweenRoundsMin: value['restBetweenRoundsMin']);
+        break;
+      case WorkoutDrillType.EMOM:
+        block = WorkoutEmomDrillBlock(
+            drills: drills,
+            timeCapMin: value['timeCapMin'],
+            intervalMin: value['intervalMin']);
+        break;
+      case WorkoutDrillType.REST:
+        block = WorkoutRestDrillBlock(timeMin: value['timeMin']);
+        break;
+    }
+
+    block.type = drillType;
+    return block;
+  }
+
   List<WorkoutDrill> copyDrills() {
     return drills.map((w) => w.copy()).toList();
   }
 }
 
 class WorkoutSingleDrillBlock extends WorkoutDrillsBlock {
-  WorkoutSingleDrillBlock(WorkoutDrill drill)
+  WorkoutSingleDrillBlock({@required WorkoutDrill drill})
       : super(type: WorkoutDrillType.SINGLE, drills: [drill]);
 
   WorkoutSingleDrillBlock copy() {
-    return WorkoutSingleDrillBlock(copyDrills()[0]);
+    return WorkoutSingleDrillBlock(drill: copyDrills()[0]);
   }
 
   Map<String, dynamic> toMapParams() {
@@ -188,11 +271,11 @@ class WorkoutSingleDrillBlock extends WorkoutDrillsBlock {
 }
 
 class WorkoutMultisetDrillBlock extends WorkoutDrillsBlock {
-  WorkoutMultisetDrillBlock(List<WorkoutDrill> drill)
-      : super(type: WorkoutDrillType.MULTISET, drills: drill);
+  WorkoutMultisetDrillBlock({@required List<WorkoutDrill> drills})
+      : super(type: WorkoutDrillType.MULTISET, drills: drills);
 
   WorkoutMultisetDrillBlock copy() {
-    return WorkoutMultisetDrillBlock(copyDrills());
+    return WorkoutMultisetDrillBlock(drills: copyDrills());
   }
 
   Map<String, dynamic> toMapParams() {
@@ -203,7 +286,8 @@ class WorkoutMultisetDrillBlock extends WorkoutDrillsBlock {
 class WorkoutAmrapDrillBlock extends WorkoutDrillsBlock {
   int minutes;
 
-  WorkoutAmrapDrillBlock({this.minutes, List<WorkoutDrill> drills})
+  WorkoutAmrapDrillBlock(
+      {@required this.minutes, @required List<WorkoutDrill> drills})
       : super(type: WorkoutDrillType.AMRAP, drills: drills);
 
   WorkoutAmrapDrillBlock copy() {
@@ -221,10 +305,10 @@ class WorkoutForTimeDrillBlock extends WorkoutDrillsBlock {
   int restBetweenRoundsMin;
 
   WorkoutForTimeDrillBlock(
-      {this.timeCapMin,
-      this.rounds,
-      this.restBetweenRoundsMin,
-      List<WorkoutDrill> drills})
+      {@required this.timeCapMin,
+        @required this.rounds,
+        @required this.restBetweenRoundsMin,
+        @required List<WorkoutDrill> drills})
       : super(type: WorkoutDrillType.ForTime, drills: drills);
 
   WorkoutForTimeDrillBlock copy() {
@@ -249,7 +333,9 @@ class WorkoutEmomDrillBlock extends WorkoutDrillsBlock {
   int intervalMin;
 
   WorkoutEmomDrillBlock(
-      {this.timeCapMin, this.intervalMin, List<WorkoutDrill> drills})
+      {@required this.timeCapMin,
+        @required this.intervalMin,
+        @required List<WorkoutDrill> drills})
       : super(type: WorkoutDrillType.EMOM, drills: drills);
 
   WorkoutEmomDrillBlock copy() {
@@ -265,7 +351,7 @@ class WorkoutEmomDrillBlock extends WorkoutDrillsBlock {
 class WorkoutRestDrillBlock extends WorkoutDrillsBlock {
   int timeMin;
 
-  WorkoutRestDrillBlock({this.timeMin})
+  WorkoutRestDrillBlock({@required this.timeMin})
       : super(type: WorkoutDrillType.REST, drills: []);
 
   WorkoutRestDrillBlock copy() {

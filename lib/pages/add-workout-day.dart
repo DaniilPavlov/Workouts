@@ -27,7 +27,7 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
     }
 
     if (day.drillBlocks == null || day.drillBlocks.length == 0)
-      day.drillBlocks = [WorkoutSingleDrillBlock(WorkoutDrill())];
+      day.drillBlocks = [WorkoutSingleDrillBlock(drill: WorkoutDrill())];
 
     super.initState();
   }
@@ -53,25 +53,31 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
     WorkoutDrillsBlock newBlock;
     switch (_defaultNewDrillType) {
       case 'Single Drill':
-        newBlock = WorkoutSingleDrillBlock(WorkoutDrill());
+        newBlock = WorkoutSingleDrillBlock(drill: WorkoutDrill());
         break;
       case 'Multiset Drill':
-        newBlock = WorkoutMultisetDrillBlock([WorkoutDrill(), WorkoutDrill()]);
+        newBlock =
+            WorkoutMultisetDrillBlock(drills: [WorkoutDrill(), WorkoutDrill()]);
         break;
       case 'For Time':
-        newBlock =
-            WorkoutForTimeDrillBlock(drills: [WorkoutDrill(), WorkoutDrill()]);
+        newBlock = WorkoutForTimeDrillBlock(
+            drills: [WorkoutDrill(), WorkoutDrill()],
+            timeCapMin: 10,
+            rounds: 2,
+            restBetweenRoundsMin: 1);
         break;
       case 'AMRAP':
-        newBlock =
-            WorkoutAmrapDrillBlock(drills: [WorkoutDrill(), WorkoutDrill()]);
+        newBlock = WorkoutAmrapDrillBlock(
+            drills: [WorkoutDrill(), WorkoutDrill()], minutes: 10);
         break;
       case 'EMOM':
-        newBlock =
-            WorkoutEmomDrillBlock(drills: [WorkoutDrill(), WorkoutDrill()]);
+        newBlock = WorkoutEmomDrillBlock(
+            drills: [WorkoutDrill(), WorkoutDrill()],
+            timeCapMin: 10,
+            intervalMin: 1);
         break;
       case 'Rest':
-        newBlock = WorkoutRestDrillBlock();
+        newBlock = WorkoutRestDrillBlock(timeMin: 5);
         break;
     }
 
@@ -139,7 +145,7 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Workouts // Create Day Plan'),
+        title: Text('MaxFit // Create Day Plan'),
         actions: <Widget>[
           SaveButton(onPressed: _saveDayPlan),
         ],
@@ -207,7 +213,7 @@ class _AddWorkoutDayState extends State<AddWorkoutDay> {
                 title: Row(children: <Widget>[
                   Text(_getDrillBlockHeader(block),
                       style: TextStyle(
-                          color: Theme.of(context).textTheme.title.color,
+                          color: Theme.of(context).textTheme.headline6.color,
                           fontWeight: FontWeight.bold)),
                   SizedBox(width: 20),
                   _canSelectDrillsCount(block)

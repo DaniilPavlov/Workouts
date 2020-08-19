@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:workouts/models/user.dart';
+import 'package:workouts/core/constants.dart';
 import 'package:workouts/pages/check.dart';
 import 'package:workouts/services/auth.dart';
 
@@ -13,14 +14,14 @@ class WorkoutsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // С помощью StreamProvider<User> мы всегда знаем текущего нашего пользователя
     return StreamProvider<User>.value(
-        value: AuthService().currentUser,
-        child: MaterialApp(
+      value: AuthService().currentUser,
+      child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: "Workouts",
+          title: 'WORKOUTS',
           theme: ThemeData(
-              primaryColor: Color.fromRGBO(73, 161, 212, 1),
-              textTheme: TextTheme(title: TextStyle(color: Colors.white))),
-          home: CheckPage(),
-        ));
+              primaryColor: bgColorPrimary,
+              textTheme: TextTheme(headline6: TextStyle(color: Colors.white))),
+          home: CheckPage()),
+    );
   }
 }

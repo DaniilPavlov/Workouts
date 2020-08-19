@@ -41,7 +41,7 @@ class _AddWorkoutWeekState extends State<AddWorkoutWeek> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Workouts // Create Week Plan'),
+        title: Text('MaxFit // Create Week Plan'),
         actions: <Widget>[
           SaveButton(
             onPressed: () {
@@ -104,11 +104,16 @@ class _AddWorkoutWeekState extends State<AddWorkoutWeek> {
                                         ? '${week.days[i].notRestDrillBlocksCount} drills'
                                         : 'Rest Day'),
                                 style: TextStyle(
-                                    color:
-                                        Theme.of(context).textTheme.title.color,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .headline6
+                                        .color,
                                     fontWeight: FontWeight.bold)),
                             trailing: Icon(Icons.keyboard_arrow_right,
-                                color: Theme.of(context).textTheme.title.color),
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .headline6
+                                    .color),
                           ),
                         ),
                       ),

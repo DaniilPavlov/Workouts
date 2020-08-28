@@ -1,6 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:workouts/components/my-workouts.dart';
+import 'package:workouts/components/active-workouts.dart';
 import 'package:workouts/components/workouts-list.dart';
 import 'package:workouts/pages/add-workout.dart';
 import 'package:workouts/services/auth.dart';
@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> {
               label: SizedBox.shrink())
         ],
       ),
-      body: sectionIndex == 0 ? MyWorkouts() : WorkoutsList(),
+      body: sectionIndex == 0 ? ActiveWorkouts() : WorkoutsList(),
       bottomNavigationBar: navigationBar,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
